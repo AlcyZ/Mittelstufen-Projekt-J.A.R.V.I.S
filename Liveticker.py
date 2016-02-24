@@ -21,16 +21,16 @@ def handleLiveticker(self, lastDate):
     spieltag = json.loads(requests.get("http://www.openligadb.de/api/getcurrentgroup/" + liga).text)["GroupOrderID"]
     
     def getLetzteAenderung(liga, saison, spieltag):
-        return json.loads(requests.get("http://www.openligadb.de/api/getlastchangedate/" + 
-                    liga + "/" + str(saison) + "/" + str(spieltag)).text)
+        return json.loads(requests.get(("http://www.openligadb.de/api/getlastchangedate/" +  
+                    + liga + "/" + str(saison) + "/" + str(spieltag))).text)
     
     #wenn nichts geupdated wurde, gibt man einfach den alten timestamp zurück
     if lastDate == getLetzteAenderung(liga, saison, spieltag):
         return lastDate
 
     def getErgebnis(team, liga, spieltag):
-        ergebnis = json.loads(requests.get("http://www.openligadb.de/api/getmatchdata/" + 
-                    liga + "/" + str(saison) + "/" + str(spieltag)).text)
+        ergebnis = json.loads(requests.get("http://www.openligadb.de/api/getmatchdata/" \
+                    + liga + "/" + str(saison) + "/" + str(spieltag)).text)
         for spiel in ergebnis["spiele"]:
             if spiel["Team1"]["TeamName"] == team or spiel["Team2"]["TeamName"] == team:
                 return spiel
@@ -57,6 +57,7 @@ def handleLiveticker(self, lastDate):
                 if tor["GoalID"] > tmp["GoalID"]:
                     tmp = tor
             return tmp
+        #merke dir das zuletzt gefallene Tor
         letztesTor = getLetztesTor(tore)
         
         def formatiereTor(tor):
@@ -66,11 +67,13 @@ def handleLiveticker(self, lastDate):
             auswaertsTore = tor["ScoreTeam2"]
             spielminute = tor["MatchMinute"]
             torschuetze = tor["GoalGetterName"]
-            return "Tor durch " + torschuetze + " in der " + str(spielminute) + ". Spielminute! Neuer Zwischenstand: " +
-                    heimTeam + " " + str(heimTore) + " : " + str(auswaertsTore + " " + auswaertsTeam
+            return ("Tor durch " + torschuetze + " in der " + str(spielminute) + ". Spielminute! Neuer Zwischenstand: "
+                    + heimTeam + " " + str(heimTore) + " : " + str(auswaertsTore) + " " + auswaertsTeam)
         #packe das neue Tor in die Queue
-        self.q.put(formatiereTor(tor))
-        print(formatiereTor(tor))
+        if letztesTor["GoalID"] > 0:
+            self.q.put(formatiereTor(letztesTor))
+            print(formatiereTor(letztesTor))
+    
     #wenn das Spiel vorbei ist, setze die Anzahl der Tore zurück
     if ergebnis["MatchIsFinished"]:
         self.anzahlTore = 0
