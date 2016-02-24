@@ -30,9 +30,9 @@ def handleLiveticker(self, lastDate):
     def getErgebnis(team, liga, spieltag):
         ergebnis = json.loads(requests.get("http://www.openligadb.de/api/getmatchdata/" + 
                     liga + "/" + str(saison) + "/" + str(spieltag)).text)
-        for each spiel in ergebnis["spiele"]:
-            if e["Team1"]["TeamName"] == team or e["Team2"]["TeamName"] == team:
-                return e
+        for spiel in ergebnis["spiele"]:
+            if spiel["Team1"]["TeamName"] == team or spiel["Team2"]["TeamName"] == team:
+                return spiel
         return {}
         
     #hole dir das aktuelle Ergebnis des Teams
