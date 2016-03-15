@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8-*-
 import re
 import subprocess
 from client import jasperpath
@@ -13,7 +15,6 @@ def handle(text, mic, profile):
                    number)
     """
     befehle = ["STOP", "PLAY", "NEXT", "PREVIOUS", "VOLUME", "UP", "DOWN", "EXIT"]
-    music_stt_engine = mic.active_stt_engine.get_instance("music", befehle)
     
     mic.say("Starting radio . . .")
     
@@ -41,33 +42,33 @@ def handle(text, mic, profile):
     MPD.play()
     
     cmd = ""    
+    mic.say("Say exit to exit radio mode.")
     while (cmd != "EXIT"):
         cmd = mic.passivelisten().upper()
-        if cmd in befehle:
-            if cmd = "PLAY": # play
-                MPD.play()
-            elif cmd = "STOP": # stop
-                MPD.stop()
-            elif cmd = "VOLUME": # lautstaerke
-                cmd = mic.activeListen().upper()
-                if cmd = "UP":
-                    MPD.vol_up()
-                elif cmd = "DOWN":
-                    MPD.vol_down()
-            elif cmd = "NEXT": # naechste playlist
-                MPD.stop()
-                index += 1
-                if index > len(playlists) - 1:
-                    index = 0
-                MPD.load(playlists[index])
-                MPD.play()
-            elif cmd = "PREVIOUS": # vorherige playlist
-                MPD.stop()
-                index -= 1
-                if index < 0:
-                    index = len(playlists) - 1
-                MPD.load(playlists[index])
-                MPD.play()
+        if cmd = "PLAY": # play
+            MPD.play()
+        elif cmd = "STOP": # stop
+            MPD.stop()
+        elif cmd = "VOLUME": # lautstaerke
+            cmd = mic.activeListen().upper()
+            if cmd = "UP":
+                MPD.vol_up()
+            elif cmd = "DOWN":
+                MPD.vol_down()
+        elif cmd = "NEXT": # naechste playlist
+            MPD.stop()
+            index += 1
+            if index > len(playlists) - 1:
+                index = 0 # schleife durch die playlists
+            MPD.load(playlists[index])
+            MPD.play()
+        elif cmd = "PREVIOUS": # vorherige playlist
+            MPD.stop()
+            index -= 1
+            if index < 0:
+                index = len(playlists) - 1 # schleife durch die playlists
+            MPD.load(playlists[index])
+            MPD.play()
     MPD.stop()
 
 def isValid(text):
@@ -81,7 +82,7 @@ def isValid(text):
 class MPD(object):
 
     @staticmethod
-    def load(self, playlist):
+    def load(self, playlist): # lädt eine neue Playlist
         subprocess.call("mpc load " + playlist, shell=True)
 
     @staticmethod
@@ -101,9 +102,9 @@ class MPD(object):
         subprocess.call("mpc volume -10", shell=True)
         
     @staticmethod
-    def next(self): # nicht benutzt
+    def next(self): # nicht benutzt, man wechselt die Playlist, nicht den Song in der Playlist
         subprocess.call("mpc next", shell=True)
         
     @staticmethod
-    def previous(self): # nicht benutzt
+    def previous(self): # siehe next()
         subprocess.call("mpc previous", shell=True)
