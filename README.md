@@ -30,8 +30,8 @@ As this repository is part of a **school project**, the active development is on
 
 ## Contributors
 - [@alexromeike](https://github.com/alexromeike)
-- [@marioblokand](https://github.com/ronaldloyko)
-- [@ronaldloyko](https://github.com/marioblokand)
+- [@marioblokand](https://github.com/marioblokand)
+- [@ronaldloyko](https://github.com/ronaldloyko)
 
 ## License
 MIT
