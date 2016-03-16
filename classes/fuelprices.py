@@ -3,19 +3,18 @@
 
 import requests
 
-"""
-This class retrieves the current average
-fuel prices in Germany using the data provided
-by spritpreiskontrolle.de.
-"""
 
-class FuelPrices():
+class FuelPrices(object):
+    """This class retrieves the current average fuel prices.
+
+    fuel prices in Germany using the data provided
+    by spritpreiskontrolle.de.
+    """
 
     API_URL = 'http://data.spritpreiskontrolle.de/api/avgpricetrend.json'
 
     def get_prices(self):
-        """
-        Retrieves the average fuel prices.
+        """Retrieve the average fuel prices.
 
         Returns:
             {Object}
@@ -23,17 +22,15 @@ class FuelPrices():
         Raises:
             {Error}
         """
-
         response = requests.get(self.API_URL)
 
         if response.status_code == 200:
             return self._parse_response(response)
         else:
-            raise Error('Unexpected server response')
+            raise Exception('Unexpected server response')
 
     def _parse_response(self, response):
-        """
-        Parses the server response.
+        """Parse the server response.
 
         Arguments:
             response {Object} -- Server response.
@@ -41,7 +38,6 @@ class FuelPrices():
         Returns:
             {Object} -- Fuel prices object.
         """
-
         data = response.json()['response']
 
         prices = {
