@@ -14,19 +14,19 @@ def handle(text, mic, profile):
     if "Liveticker" in profile:
         if "Team" in profile["Liveticker"] and "Liga" in profile["Liveticker"]:
             #merke dir das Team
-            team = self.profile["Liveticker"]["Team"]
+            team = profile["Liveticker"]["Team"]
             #merke dir die Liga
-            liga = self.profile["Liveticker"]["Liga"]
+            liga = profile["Liveticker"]["Liga"]
             
             lt = Liveticker(team, liga)
             
             ergebnis = lt.getErgebnis()
             
             if ergebnis:
-                heimTeam = lt.getTeam(ergebnis, 1)
-                auswaertsTeam = lt.getTeam(ergebnis, 2)
-                heimTore = lt.getTore(ergebnis, 1)
-                auswaertsTore = lt.getTore(ergebnis, 2)
+                heimTeam = Liveticker.getTeam(ergebnis, 1)
+                auswaertsTeam = Liveticker.getTeam(ergebnis, 2)
+                heimTore = Liveticker.getTore(ergebnis, 1)
+                auswaertsTore = Liveticker.getTore(ergebnis, 2)
                 if ergebnis["MatchIsFinished"]:
                     output = "Das Endergebnis aus dem Spiel %s gegen %s lautet... %s zu %s." % (heimTeam, auswaertsTeam, heimTore, auswaertsTore)
                 else:
