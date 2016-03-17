@@ -2,7 +2,7 @@
 import Queue
 import atexit
 from modules import Gmail
-from modules import Liveticker
+from classes.liveticker import Liveticker
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 
