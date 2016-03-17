@@ -69,7 +69,7 @@ class Notifier(object):
         ergebnis = lt.getErgebnis()
         
         if ergebnis:
-            letztesTor = lt.getLetztesTor(ergebnis)
+            letztesTor = Liveticker.getLetztesTor(ergebnis)
             
             if letztesTor["GoalID"] > latest:
                 self.q.put(Liveticker.formatiereTor(letztesTor))
