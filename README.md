@@ -1,3 +1,5 @@
+![](logo.png)
+
 # JARVIS
 
 #### Voice command based home automation for your Raspberry Pi.
