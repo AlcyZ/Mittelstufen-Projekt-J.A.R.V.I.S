@@ -63,17 +63,17 @@ class Notifier(object):
         """ Gets the new goal from the game and places it in the Notifier's queue.
             latest ist die letzte GoalID von OpenLigaDB, standardmäßig: 0
         """
-        # Hole dir alle notwendigen Informationen um zu überprüfen ob ein Tor gefallen ist.
         team = self.profile["Liveticker"]["Team"]
         liga = self.profile["Liveticker"]["Liga"]
-        saison = Liveticker.getAktuelleSaison()
-        spieltag = Liveticker.getAktuellerSpieltag(liga)
-        ergebnis = Liveticker.getErgebnis()
-        letztesTor = getLetztesTor(ergebnis)
+        lt = Liveticker(team, liga)
+        ergebnis = lt.getErgebnis()
         
-        if letztesTor["GoalID"] > latest:
-            self.q.put(Liveticker.formatiereTor(letztesTor))
-            latest = letztesTor["GoalID"]
+        if ergebnis:
+            letztesTor = lt.getLetztesTor(ergebnis)
+            
+            if letztesTor["GoalID"] > latest:
+                self.q.put(Liveticker.formatiereTor(letztesTor))
+                latest = letztesTor["GoalID"]
         
         return latest
         
