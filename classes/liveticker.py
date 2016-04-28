@@ -1,85 +1,89 @@
+# -*- coding: utf-8-*-
 import datetime
 import json
 import requests
 
 class Liveticker:
 
-    # API Endpunkt von OpenLigaDB für aktuelle Ergebnisse
+    # API Endpoint of the OpenLigaDB Database for football match data
     API = "http://www.openligadb.de/api/"
 
     
-    def __init__(self, team, liga):
+    def __init__(self, team, league):
     """
         Initialization of the Liveticker module.
         Initialized properties:
             ::team
-            ::liga
-            ::saison
-            ::spieltag
+            ::league
+            ::season
+            ::matchday
         """
     self.team = team
-    self.liga = liga
-    self.saison = getAktuelleSaison()
-    self.spieltag = getAktuellerSpieltag()
+    self.league = league
+    self.season = get_current_season()
+    self.matchday = get_current_matchday()
     
 
-    def getAktuelleSaison(self):
-        """ Merke dir die aktuelle Saison, bis zum Juni läuft die Saison aus dem Vorjahr noch 
-                eventuell bessere Methode überlegen, dies funktioniert nur für Bundesliga afaik
+    def get_current_season(self):
+        """ 
+            Get the current season of the league.
+            Seasons change in July of each year.
         """
         if date.today().month < 7:
             return date.today().year - 1
         return date.today().year
         
-    def getAktuellerSpieltag(self):
-        """ Merke dir den aktuellen Spieltag aus der übergebenen Liga """
-        return json.loads(requests.get(API + "getcurrentgroup/" + self.liga).text)["GroupOrderID"]
-
-    def getLetzteAenderung(self):
-        """ Hole dir den Timestamp der letzten Änderung vom aktuellen Spieltag 
-                Returns: Das date der letzten Änderung vom aktuellen Spieltag
+    def get_current_matchday(self):
         """
-        return json.loads(requests.get((API + "getlastchangedate/" + self.liga + "/" + str(self.saison) + "/" + str(self.spieltag))).text)
-
-    def getErgebnis(self):
-        """ Hole dir das Ergebnis zu den übergebenen Parametern
-                Returns: Ein dict mit dem aktuellen Ergebnis zum Spiel des Teams
+            Returns: the current matchday of the season
         """
-        response = json.loads(requests.get(API + "getmatchdata/" + self.liga + "/" + str(self.saison) + "/" + str(self.spieltag)).text)
+        return json.loads(requests.get(API + "getcurrentgroup/" + self.league).text)["GroupOrderID"]
+
+    def get_last_change_date(self):
+        """
+            Returns: the last change date of the current matchday
+        """
+        return json.loads(requests.get((API + "getlastchangedate/" + self.league + "/" + str(self.season) + "/" + str(self.matchday))).text)
+
+    def get_match_data(self):
+        """
+            Returns: a dict object with the current match data for the supported team
+        """
+        response = json.loads(requests.get(API + "getmatchdata/" + self.league + "/" + str(self.season) + "/" + str(self.matchday)).text)
         for spiel in response:
-            if getTeam(spiel, 1) == self.team or getTeam(spiel, 2) == self.team:
+            if get_team(spiel, 1) == self.team or get_team(spiel, 2) == self.team:
                 return spiel
         return {}
     
     @staticmethod
-    def getTeam(ergebnis, teamNr):
-        """ Hole dir den Namen des Teams aus dem Ergebnis dict 
-                Returns: Der Name des Teams mit der Teamnummer 1 oder 2
+    def get_team(match_data, teamNr):
         """
-        return ergebnis["Team" + str(teamNr)]["TeamName"]
+            Returns: name of the team with the given teamNr
+        """
+        return match_data["Team" + str(teamNr)]["TeamName"]
 
     @staticmethod
-    def getTore(ergebnis, teamNr):
-        """ Hole dir die Anzahl der Tore vom Team aus dem Ergebnis dict 
-                Returns: Die Anzahl der Tore des Teams mit der Teamnummer 1 oder 2
+    def get_goals(match_data, teamNr):
         """
-        return ergebnis["ScoreTeam" + str(teamNr)]
+            Returns: amount of goals of the team with the given teamNr
+        """
+        return match_data["ScoreTeam" + str(teamNr)]
         
     @staticmethod
-    def getLetztesTor(ergebnis):
-        """ Hole dir die maximale GoalID aus dem Goals Array vom Ergebnis 
-                Returns: Das dict des letzten geschossenen Tors aus dem Spiel ergebnis
+    def get_last_goal(match_data):
         """
-        letztesTor = ["GoalID" : "0"]
-        if ergebnis["Goals"]:
-            for goal in ergebnis["Goals"]:
-                if goal["GoalID"] > letztesTor["GoalID"]:
-                    letztesTor = goal
-        return letztesTor
+            Returns: the dict of the last scored goal of the given match data
+        """
+        last_goal = ["GoalID" : "0"]
+        if match_data["Goals"]:
+            for goal in match_data["Goals"]:
+                if goal["GoalID"] > last_goal["GoalID"]:
+                    last_goal = goal
+        return last_goal
         
     @staticmethod
-    def formatiereTor(tor):
-        """ Formatiere ein dict mit der Form:
+    def format_goal(goal):
+        """ Format a dict object with the form:
                 Team1
                     TeamName
                 Team2
@@ -89,14 +93,14 @@ class Liveticker:
                 MatchMinute
                 GoalGetterName
             
-            Returns: den formatierten String
+            Returns: the formatted string
         """
-        heimTeam = ergebnis["Team1"]["TeamName"]
-        auswaertsTeam = ergebnis["Team2"]["TeamName"]
-        heimTore = tor["ScoreTeam1"]
-        auswaertsTore = tor["ScoreTeam2"]
-        spielminute = tor["MatchMinute"]
-        torschuetze = tor["GoalGetterName"]
-        return ("Tor durch " + torschuetze + " in der " + str(spielminute) + ". Spielminute! Neuer Zwischenstand: "
-                + heimTeam + " " + str(heimTore) + " : " + str(auswaertsTore) + " " + auswaertsTeam)
+        home_team = match_data["Team1"]["TeamName"]
+        away_team = match_data["Team2"]["TeamName"]
+        home_score = goal["ScoreTeam1"]
+        away_score = goal["ScoreTeam2"]
+        match_minute = goal["MatchMinute"]
+        goal_getter = goal["GoalGetterName"]
+        return ("Goal by " + goal_getter + " in the " + str(match_minute) + ". Minute! New score: "
+                + home_team + " " + str(home_score) + " " + away_team + " " + str(away_score))
     
