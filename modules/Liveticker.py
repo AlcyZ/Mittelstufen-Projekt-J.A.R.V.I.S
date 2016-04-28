@@ -9,36 +9,39 @@ from datetime import date
 WORDS = ["LIVETICKER"]
 
 def handle(text, mic, profile):
-    """ Gib den aktuellen Zwischenstand aus dem Spiel des unterstützten Teams zurück.
+    """
+        Returns: the current score of the game of the supported team from the profile
     """
     if "Liveticker" in profile:
-        if "Team" in profile["Liveticker"] and "Liga" in profile["Liveticker"]:
-            #merke dir das Team
-            team = profile["Liveticker"]["Team"]
-            #merke dir die Liga
-            liga = profile["Liveticker"]["Liga"]
+        if "team" in profile["Liveticker"] and "league" in profile["Liveticker"]:
+            #retrieve the supported team
+            team = profile["Liveticker"]["team"]
+            #retrieve the league of the supported team
+            league = profile["Liveticker"]["league"]
             
-            lt = Liveticker(team, liga)
+            lt = Liveticker(team, league)
             
-            ergebnis = lt.getErgebnis()
+            match_data = lt.get_match_data()
             
-            if ergebnis:
-                heimTeam = Liveticker.getTeam(ergebnis, 1)
-                auswaertsTeam = Liveticker.getTeam(ergebnis, 2)
-                heimTore = Liveticker.getTore(ergebnis, 1)
-                auswaertsTore = Liveticker.getTore(ergebnis, 2)
-                if ergebnis["MatchIsFinished"]:
-                    output = "Das Endergebnis aus dem Spiel %s gegen %s lautet... %s zu %s." % (heimTeam, auswaertsTeam, heimTore, auswaertsTore)
+            if match_data:
+                home_team = Liveticker.get_team(match_data, 1)
+                away_team = Liveticker.get_team(match_data, 2)
+                home_score = Liveticker.get_goals(match_data, 1)
+                away_score = Liveticker.get_goals(match_data, 2)
+                if match_data["MatchIsFinished"]:
+                    output = "Match finished! %s against %s ... %s to %s." % (home_team, away_team, home_score, away_score)
                 else:
-                    output = "Der aktuelle Zwischenstand aus dem Spiel %s gegen %s lautet... %s zu %s." % (heimTeam, auswaertsTeam, heimTore, auswaertsTore)
+                    output = "Goal! New score in the game %s against %s ... %s to %s." % (home_team, away_team, home_score, away_score)
                 mic.say(output)
             else:
-                mic.say("Fehler beim Auslesen vom Ergebnis. Bitte überprüfen Sie ihre Profildatei und geben Sie richtige Werte für ihr Team und die Liga ein!")
+                mic.say("Error while reading your profile. Make sure you have set your supported team and it's league set correctly.")
         else:
-            mic.say("Sie müssen Angaben zu dem Team und der Liga des Teams in der Profildatei machen! Zum Beispiel 'Werder Bremen' und 'bl1' für die erste Bundesliga.")
+            mic.say("Error. You have to specify a supported team and it's league in your profile.")
     else:
-        mic.say("Sie müssen einen Eintrag in der Profildatei mit dem Namen Liveticker haben!")
+        mic.say("Error. To use the liveticker functionality, specify a supported team and it's league in your profile.")
         
 def isValid(text):
-    """ Gib True zurück wenn der Input was mit Liveticker zu tun hat """
+    """ 
+        Returns: true if the input is "liveticker"
+    """
     return bool(re.search(r'\bliveticker\b', text, re.IGNORECASE))
