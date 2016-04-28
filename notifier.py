@@ -61,19 +61,19 @@ class Notifier(object):
         
     def handleLivetickerNotifications(self, latest):
         """ Gets the new goal from the game and places it in the Notifier's queue.
-            latest ist die letzte GoalID von OpenLigaDB, standardmäßig: 0
+            latest is the last goal ID
         """
-        team = self.profile["Liveticker"]["Team"]
-        liga = self.profile["Liveticker"]["Liga"]
-        lt = Liveticker(team, liga)
-        ergebnis = lt.getErgebnis()
+        team = self.profile["Liveticker"]["team"]
+        league = self.profile["Liveticker"]["league"]
+        lt = Liveticker(team, league)
+        match_data = lt.get_match_data()
         
-        if ergebnis:
-            letztesTor = Liveticker.getLetztesTor(ergebnis)
+        if match_data:
+            last_goal = Liveticker.get_last_goal(match_data)
             
-            if letztesTor["GoalID"] > latest:
-                self.q.put(Liveticker.formatiereTor(letztesTor))
-                latest = letztesTor["GoalID"]
+            if last_goal["GoalID"] > latest:
+                self.q.put(Liveticker.format_goal(last_goal))
+                latest = last_goal["GoalID"]
         
         return latest
         
